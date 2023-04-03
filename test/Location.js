@@ -1,7 +1,10 @@
 const chai = require("chai");
 const { constants } = require("ethers");
 const expect = chai.expect;
+const assert = chai.assert;
 const { ethers } = require("hardhat");
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
 
 
 
@@ -44,7 +47,7 @@ describe("Location Contract", function () {
 
         describe("Registred a new object", function () {
             it("Should create a new Object", async function () {
-                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "Vilnius");
+                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
                 expect(await location.numberOfObjects()).to.equal(1);
                 const obj = await location.objects(1);
                 expect(obj.id).to.equal(1);
@@ -56,7 +59,7 @@ describe("Location Contract", function () {
                 );
                 expect(obj.owner).to.equal(owner.address);
                 expect(obj.category).to.equal("Technologie");
-                expect(obj.lieu).to.equal("Vilnius");
+                expect(obj.lieu).to.equal("La Rochelle");
                 expect(obj.isAvailable).to.equal(true);
             });
         })
@@ -72,7 +75,38 @@ describe("Location Contract", function () {
                 expect(result).to.equal(false);
             })
         })
+
+        describe("ResearchObject", function () {
+            it("Should find an object based on the research", async function () {
+                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
+                const objectExists = await location.connect(addr1).researchAndLocationObject("Technologie", "La Rochelle", "Velo");
+                const obj = await location.objects(1);
+                expect(obj.category).to.equal("Technologie");
+                expect(obj.lieu).to.equal("La Rochelle");
+                expect(obj.name).to.equal("Velo");
+                expect(objectExists).to.equal(true);
+            });
+
+            it("Should not find an object with a different category", async function () {
+                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
+                const objectExists = await location.connect(addr1).researchAndLocationObject("Livre", "La Rochelle", "Velo");
+                expect(objectExists).to.equal(false);
+            });
+
+            it("Should not find an object with a different lieu", async function () {
+                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
+                await location.connect(owner).registerObject("Trottinette", "Trottinette électrique", 1, 500, "Technologie", "Paris");
+                const objectExists = await location.connect(addr1).researchAndLocationObject("Technologie", "Paris", "Velo");
+                expect(objectExists).to.equal(false);
+            });
+
+
+
+            it("Should not find an object with a different name", async function () {
+                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
+                const objectExists = await location.connect(addr1).researchAndLocationObject("Technologie", "La Rochelle", "Trottinette");
+                expect(objectExists).to.equal(false);
+            });
+        })
     });
-
-
 })

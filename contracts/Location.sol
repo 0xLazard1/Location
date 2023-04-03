@@ -72,5 +72,26 @@ contract Location {
         return false;
     }
 
-    function ResearchObject(string memory category, string memory lieu) external view returns()
+    function researchAndLocationObject(
+        string memory _category1,
+        string memory _lieu,
+        string memory _names
+    ) external view returns (bool) {
+        require(categoryExists(_category1), "Category does not exist");
+        require(lieuExists(_lieu), "Lieu does not exist");
+
+        for (uint256 i = 1; i <= numberOfObjects; i++) {
+            if (
+                keccak256(bytes(objects[i].name)) == keccak256(bytes(_names)) &&
+                keccak256(bytes(objects[i].category)) ==
+                keccak256(bytes(_category1)) &&
+                keccak256(bytes(objects[i].lieu)) == keccak256(bytes(_lieu)) &&
+                objects[i].isAvailable
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
