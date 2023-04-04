@@ -103,9 +103,10 @@ describe("Location Contract", function () {
 
 
             it("Should not find an object with a different name", async function () {
-                await location.connect(owner).registerObject("Velo", "Velo Simple", 1, 500, "Technologie", "La Rochelle");
-                const objectExists = await location.connect(addr1).researchAndLocationObject("Technologie", "La Rochelle", "Trottinette");
-                expect(objectExists).to.equal(false);
+                await location.connect(owner).registerObject("Pipette", "MicroLitre", 1, 400, "Technologie", "Klaipeda");
+                await location.connect(owner).registerObject("Trottinette", "Trottinette électrique", 1, 500, "Technologie", "Paris");
+                const ObjExt = await location.connect(addr1).researchAndLocationObject("Pipete", "Technologie", "Klaipeda");
+                expect(ObjExt).to.equal(false);
             });
         })
     });

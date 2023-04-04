@@ -6,6 +6,7 @@ contract Location {
     uint256 public numberOfObjects = 0;
     string[2] categories = ["Technologie", "Livre"];
     string[] lieux;
+    string[] names;
 
     struct Object {
         uint256 id;
@@ -40,6 +41,10 @@ contract Location {
             lieux.push(_lieu);
         }
 
+        if (!NameExits(_name)) {
+            names.push(_name);
+        }
+
         numberOfObjects++;
 
         Object storage object = objects[numberOfObjects];
@@ -72,6 +77,15 @@ contract Location {
         return false;
     }
 
+    function NameExits(string memory _name) public view returns (bool) {
+        for (uint256 i = 0; i < names.length; i++) {
+            if (keccak256(bytes(names[i])) == keccak256(bytes(_name))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function researchAndLocationObject(
         string memory _category1,
         string memory _lieu,
@@ -79,6 +93,7 @@ contract Location {
     ) external view returns (bool) {
         require(categoryExists(_category1), "Category does not exist");
         require(lieuExists(_lieu), "Lieu does not exist");
+        require(NameExits(_names), "Names does not exist");
 
         for (uint256 i = 1; i <= numberOfObjects; i++) {
             if (
@@ -93,5 +108,17 @@ contract Location {
         }
 
         return false;
+    }
+
+    function RentObject(
+        string memory _category,
+        string memory _lieu,
+        string memory _names,
+        uint256 _amount
+    ) external {
+        require(categoryExists(_category), "Category does not exist");
+        require(lieuExists(_lieu), "Lieu does not exist");
+        require(NameExits(_names), "Names does not exist");
+        require(_amount > 0, "Not funds");
     }
 }
