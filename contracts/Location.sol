@@ -14,7 +14,7 @@ contract Location {
         string description;
         uint256 price;
         uint256 timeOfLocation;
-        address payable owner;
+        address owner;
         string category;
         string lieu;
         bool isAvailable;
@@ -110,15 +110,9 @@ contract Location {
         return false;
     }
 
-    function RentObject(
-        string memory _category,
-        string memory _lieu,
-        string memory _names,
-        uint256 _amount
-    ) external {
-        require(categoryExists(_category), "Category does not exist");
-        require(lieuExists(_lieu), "Lieu does not exist");
-        require(NameExits(_names), "Names does not exist");
-        require(_amount > 0, "Not funds");
+    function RentObject(uint256 _id) external payable {
+        Object storage object = objects[numberOfObjects];
+        require(objects[_id].id != 0, "Id does not exist");
+        require(objects[_id].isAvailable == true, "Object does not exist");
     }
 }

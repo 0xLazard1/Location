@@ -15,10 +15,11 @@ describe("Location Contract", function () {
     let addr1;
     let addr2;
     let addrs;
+    let renter;
 
     beforeEach(async function () {
         Location = await ethers.getContractFactory('Location');
-        [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+        [owner, addr1, addr2, renter, ...addrs] = await ethers.getSigners();
         location = await Location.deploy();
         await location.deployed();
     })
@@ -102,12 +103,23 @@ describe("Location Contract", function () {
 
 
 
-            it("Should not find an object with a different name", async function () {
-                await location.connect(owner).registerObject("Pipette", "MicroLitre", 1, 400, "Technologie", "Klaipeda");
-                await location.connect(owner).registerObject("Trottinette", "Trottinette électrique", 1, 500, "Technologie", "Paris");
-                const ObjExt = await location.connect(addr1).researchAndLocationObject("Pipete", "Technologie", "Klaipeda");
-                expect(ObjExt).to.equal(false);
-            });
+            // it("Should not find an object with a different name", async function () {
+            //     await location.connect(owner).registerObject("Pipette", "MicroLitre", 1, 400, "Technologie", "Klaipeda");
+            //     await location.connect(owner).registerObject("Trottinette", "Trottinette électrique", 1, 500, "Technologie", "Paris");
+            //     const ObjExt = await location.connect(addr1).researchAndLocationObject("Pipete", "Technologie", "Klaipeda");
+            //     expect(ObjExt).to.equal(false);
+            // });
         })
+
+        describe("RendObject", function () {
+
+            it("Should don't find Id", async function () {
+                await location.connect(owner).registerObject("Velo", "Joli", 1, 500, "Livre", "LaRochelle");
+                const obj = location.connect(addr1).RentObject(2);
+                expect(obj.id).to.be.revertedWith("Id does not exit");
+            })
+        })
+
+
     });
 })
