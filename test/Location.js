@@ -118,6 +118,17 @@ describe("Location Contract", function () {
                 const obj = location.connect(addr1).RentObject(2);
                 expect(obj.id).to.be.revertedWith("Id does not exit");
             })
+
+            it("Should buy a object", async function () {
+                await location.connect(addr1).registerObject("Ciseaux", "Joli Ciseaux", 2, 500, "Livre", "Vilnius");
+                const price = ethers.utils.parseEther("1");
+                const tx = await location.connect(addr2).RentObject(1, { value: price });
+                await tx.wait()
+                const obj = await location.objects(1);
+                expect(obj.owner).to.equal(addr2.address);
+
+
+            })
         })
 
 

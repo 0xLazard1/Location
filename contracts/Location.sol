@@ -1,10 +1,16 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
 contract Location {
     address public owner;
-    uint256 public numberOfObjects = 0;
-    string[2] categories = ["Technologie", "Livre"];
+    uint256 public numberOfObjects;
+    string[5] categories = [
+        "Technologie",
+        "Livre",
+        "Loisir",
+        "Voiture",
+        "Autres"
+    ];
     string[] lieux;
     string[] names;
 
@@ -21,6 +27,12 @@ contract Location {
     }
 
     mapping(uint256 => Object) public objects;
+
+    event RentStarted(
+        uint256 indexed _id,
+        address indexed _renter,
+        uint256 _rentStartTime
+    );
 
     constructor() {
         owner = msg.sender;
@@ -41,7 +53,7 @@ contract Location {
             lieux.push(_lieu);
         }
 
-        if (!NameExits(_name)) {
+        if (!nameExists(_name)) {
             names.push(_name);
         }
 
@@ -53,7 +65,7 @@ contract Location {
         object.description = _description;
         object.price = _price;
         object.timeOfLocation = block.timestamp + _timeOfLocation;
-        object.owner = payable(msg.sender);
+        object.owner = msg.sender;
         object.category = _category;
         object.lieu = _lieu;
         object.isAvailable = true;
@@ -77,7 +89,7 @@ contract Location {
         return false;
     }
 
-    function NameExits(string memory _name) public view returns (bool) {
+    function nameExists(string memory _name) public view returns (bool) {
         for (uint256 i = 0; i < names.length; i++) {
             if (keccak256(bytes(names[i])) == keccak256(bytes(_name))) {
                 return true;
@@ -87,32 +99,44 @@ contract Location {
     }
 
     function researchAndLocationObject(
-        string memory _category1,
+        string memory _category,
         string memory _lieu,
-        string memory _names
+        string memory _name
     ) external view returns (bool) {
-        require(categoryExists(_category1), "Category does not exist");
+        require(categoryExists(_category), "Category does not exist");
         require(lieuExists(_lieu), "Lieu does not exist");
-        require(NameExits(_names), "Names does not exist");
+        require(nameExists(_name), "Name does not exist");
 
         for (uint256 i = 1; i <= numberOfObjects; i++) {
             if (
-                keccak256(bytes(objects[i].name)) == keccak256(bytes(_names)) &&
+                keccak256(bytes(objects[i].name)) == keccak256(bytes(_name)) &&
                 keccak256(bytes(objects[i].category)) ==
-                keccak256(bytes(_category1)) &&
+                keccak256(bytes(_category)) &&
                 keccak256(bytes(objects[i].lieu)) == keccak256(bytes(_lieu)) &&
                 objects[i].isAvailable
             ) {
                 return true;
             }
         }
-
         return false;
     }
 
     function RentObject(uint256 _id) external payable {
-        Object storage object = objects[numberOfObjects];
-        require(objects[_id].id != 0, "Id does not exist");
-        require(objects[_id].isAvailable == true, "Object does not exist");
+        Object storage object = objects[_id];
+        require(object.id != 0, "Id does not exist");
+        require(object.isAvailable, "Object does not exist");
+        require(msg.value >= object.price, "Not enough funds");
+        address payable previousOwner = payable(object.owner);
+        previousOwner.transfer(object.price);
+        object.isAvailable = false;
+        object.owner = msg.sender;
+        object.timeOfLocation = block.timestamp;
+        emit RentStarted(_id, msg.sender, block.timestamp);
+    }
+
+    function isLocationEnded(uint256 _id) external view returns (bool) {
+        Object storage object = objects[_id];
+        require(object.id != 0, "Id does not exist");
+        return (block.timestamp >= object.timeOfLocation);
     }
 }
