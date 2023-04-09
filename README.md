@@ -36,7 +36,7 @@ These instructions will help you set up the project on your local machine for de
 
 - Node.js v14.x or later
 - npm v7.x or later
-- Truffle v5.x or later - Ethereum development environment for compiling, testing, and deploying smart contracts
+- Hardhat v5.x or later - Ethereum development environment for compiling, testing, and deploying smart contracts
 - Solidity v0.8.19
 - Web3.js v1.x or later
 
