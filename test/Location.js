@@ -40,7 +40,9 @@ describe("Location Contract", function () {
             expect(obj.description).to.equal("");
             expect(obj.price).to.equal(0);
             expect(obj.timeOfLocation).to.equal(0);
-            expect(obj.owner).to.equal(ethers.constants.AddressZero);
+            expect(obj.creator).to.equal(ethers.constants.AddressZero);
+            expect(obj.originalOwner).to.equal(ethers.constants.AddressZero);
+            expect(obj.OwnerRent).to.equal(ethers.constants.AddressZero);
             expect(obj.category).to.equal("");
             expect(obj.lieu).to.equal("");
             expect(obj.isAvailable).to.equal(false);
@@ -58,7 +60,9 @@ describe("Location Contract", function () {
                 expect(obj.timeOfLocation).to.be.closeTo(
                     (await ethers.provider.getBlock()).timestamp + 500, 2
                 );
-                expect(obj.owner).to.equal(owner.address);
+                expect(obj.creator).to.equal(owner.address);
+                expect(obj.originalOwner).to.equal(owner.address)
+                expect(obj.OwnerRent).to.equal(ethers.constants.AddressZero);
                 expect(obj.category).to.equal("Technologie");
                 expect(obj.lieu).to.equal("La Rochelle");
                 expect(obj.isAvailable).to.equal(true);
@@ -125,9 +129,9 @@ describe("Location Contract", function () {
                 const tx = await location.connect(addr2).RentObject(1, { value: price });
                 await tx.wait()
                 const obj = await location.objects(1);
-                expect(obj.owner).to.equal(addr2.address);
-
-
+                expect(obj.OwnerRent).to.equal(addr2.address);
+                expect(obj.creator).to.equal(addr1.address);
+                expect(obj.originalOwner).to.equal(addr1.address);
             })
         })
 

@@ -20,7 +20,9 @@ contract Location {
         string description;
         uint256 price;
         uint256 timeOfLocation;
-        address owner;
+        address creator;
+        address originalOwner;
+        address OwnerRent;
         string category;
         string lieu;
         bool isAvailable;
@@ -65,7 +67,9 @@ contract Location {
         object.description = _description;
         object.price = _price;
         object.timeOfLocation = block.timestamp + _timeOfLocation;
-        object.owner = msg.sender;
+        object.creator = msg.sender;
+        object.originalOwner = msg.sender;
+        object.OwnerRent = address(0);
         object.category = _category;
         object.lieu = _lieu;
         object.isAvailable = true;
@@ -126,10 +130,10 @@ contract Location {
         require(object.id != 0, "Id does not exist");
         require(object.isAvailable, "Object does not exist");
         require(msg.value >= object.price, "Not enough funds");
-        address payable previousOwner = payable(object.owner);
+        address payable previousOwner = payable(object.creator);
         previousOwner.transfer(object.price);
         object.isAvailable = false;
-        object.owner = msg.sender;
+        object.OwnerRent = msg.sender;
         object.timeOfLocation = block.timestamp;
         emit RentStarted(_id, msg.sender, block.timestamp);
     }
@@ -138,5 +142,16 @@ contract Location {
         Object storage object = objects[_id];
         require(object.id != 0, "Id does not exist");
         return (block.timestamp >= object.timeOfLocation);
+    }
+
+    function ReturnObject(uint256 _id) external payable {
+        Object storage object = objects[_id];
+        require(object.id != 0, "Id does not exist");
+        require(object.isAvailable = false, "Object is not Rent");
+        require(msg.sender == object.OwnerRent, "Not owner");
+        if (block.timestamp > object.timeOfLocation) {}
+        object.isAvailable = true;
+        object.creator = object.originalOwner;
+        object.OwnerRent = address(0);
     }
 }
